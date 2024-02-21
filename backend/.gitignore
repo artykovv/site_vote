@@ -2,5 +2,7 @@ backend/
 tests/
 pyproject.toml
 README.md
+poetry.lock
 
 api/.env
+api/src/certs/
