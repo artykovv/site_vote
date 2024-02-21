@@ -18,7 +18,6 @@ config.set_section_option(section, "DB_PASS", DB_PASS)
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-
 target_metadata = [user_metadata]
 
 def run_migrations_offline() -> None:

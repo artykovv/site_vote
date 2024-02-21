@@ -6,3 +6,7 @@ poetry.lock
 
 api/.env
 api/src/certs/
+api/migrations/script.py.mako
+
+__pycache__/
+*.pyc

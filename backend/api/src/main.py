@@ -1,3 +1,9 @@
 from fastapi import FastAPI
 
-app = FastAPI()
+from user.router import router as user
+
+app = FastAPI(
+    title="backend"
+)
+
+app.include_router(user)
