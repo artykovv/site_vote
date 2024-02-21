@@ -1,0 +1,6 @@
+backend/
+tests/
+pyproject.toml
+README.md
+
+api/.env
