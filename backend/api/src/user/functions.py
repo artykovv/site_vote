@@ -18,3 +18,9 @@ async def authenticate(credentials: HTTPBasicCredentials, session: AsyncSession)
     )
     result = await session.execute(query)
     return result.mappings().all()
+
+async def get_users(session: AsyncSession):
+    query = select(User)
+    result = await session.execute(query)
+    return result.mappings().all()
+    
