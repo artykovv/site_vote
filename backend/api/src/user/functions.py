@@ -1,7 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.security import HTTPBasicCredentials
-
 import hashlib
 # 
 from user.models import user as User
@@ -23,4 +22,5 @@ async def get_users(session: AsyncSession):
     query = select(User)
     result = await session.execute(query)
     return result.mappings().all()
+    
     

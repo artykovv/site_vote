@@ -6,4 +6,9 @@ app = FastAPI(
     title="backend"
 )
 
+@app.get("/")
+def root():
+    return {"data": "hello"}
+
+
 app.include_router(user)

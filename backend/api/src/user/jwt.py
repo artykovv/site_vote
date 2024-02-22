@@ -39,16 +39,6 @@ def encoded_jwt_refresh(
     return encoded
 
 
-
-def decoded_jwt(
-    token: str | bytes, 
-    public_key: str = public_key, 
-    algorithm: str = algorithm, 
-    ):
-    decoded = jwt.decode(
-        token, 
-        public_key, 
-        algorithms=algorithm,
-        )
+def decode_token(token: str, public_key: str = public_key, algorithm: str = algorithm):
+    decoded = jwt.decode(token, public_key, algorithms=[algorithm])
     return decoded
-
