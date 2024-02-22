@@ -7,7 +7,8 @@ from fastapi.responses import JSONResponse
 # 
 from database import get_async_session
 from user.schemas import CreateUser, TokenInfo
-from user.models import user as User
+# from user.models import user as User
+from user.models import User, user
 from user.functions import hash_password, authenticate, get_users
 from user.jwt import encoded_jwt, encoded_jwt_refresh, decode_token
 
@@ -35,7 +36,7 @@ async def register_user(
     return {"detail": "status success"}
 
 
-# user login + token
+# user login and return access&refresh tokens
 @router.get("/login", response_model=TokenInfo)
 async def login_user(
     response: Response,
@@ -61,7 +62,8 @@ async def login_user(
         "refresh_token": refresh,
         "token_type": "Bearer"
     }
-    
+
+# validate token access or refresh and return access token
 @router.get("/get")
 async def get_tokens(
     token: str, 
@@ -89,3 +91,12 @@ async def get_tokens(
     else:
         response.set_cookie(key="token", value=access_token, httponly=False)
         return {"data": "permissions none"}
+
+
+
+# get all users but no passwords
+@router.get("/get/users/class")
+async def get_users_classs(session: AsyncSession = Depends(get_async_session)):
+    user = await get_users(session)
+    return user
+    
