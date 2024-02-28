@@ -1,14 +1,11 @@
 from fastapi import FastAPI
 
 from user.router import router as user
+from vote.router import router as vote
 
 app = FastAPI(
     title="backend"
 )
 
-@app.get("/")
-def root():
-    return {"data": "hello"}
-
-
 app.include_router(user)
+app.include_router(vote)

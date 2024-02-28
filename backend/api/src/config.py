@@ -13,5 +13,3 @@ DB_PASS = os.environ.get("DB_PASS")
 PrivateKey = "certs/private.pem"
 PublicKey = "certs/public.pem"
 algorithm: str = "RS256"
-access_token_exp_min: int = 5
-refresh_token_exp_min: int = 4320

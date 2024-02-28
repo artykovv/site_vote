@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from sqlalchemy import DateTime, JSON, ForeignKey
 class CreateUser(BaseModel):
     username: str
     email: str
@@ -10,3 +9,8 @@ class TokenInfo(BaseModel):
     refresh_token: str
     token_type: str
 
+class ReadUser(BaseModel):
+    id: int 
+    username: str 
+    email: str
+    password: str

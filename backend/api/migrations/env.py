@@ -5,7 +5,7 @@ from alembic import context
 
 from src.config import DB_HOST, DB_PORT, DB_USER, DB_NAME, DB_PASS
 from src.user.models import metadata as user_metadata
-
+from src.vote.models import metadata as vote_metadata
 config = context.config
 
 section = config.config_ini_section
@@ -18,7 +18,7 @@ config.set_section_option(section, "DB_PASS", DB_PASS)
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-target_metadata = [user_metadata]
+target_metadata = [user_metadata, vote_metadata]
 
 def run_migrations_offline() -> None:
 
