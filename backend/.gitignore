@@ -10,3 +10,4 @@ api/migrations/script.py.mako
 
 __pycache__/
 *.pyc
+.vscode
