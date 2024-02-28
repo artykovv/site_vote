@@ -124,7 +124,7 @@ async def check_permission(token: str, session: AsyncSession, response: Response
     else: 
         return False
 
-# validate refresh token
+
 async def get_user_by_token(token: str, session: AsyncSession):
     token_decode = decode_token(token)
     username = token_decode["username"]
