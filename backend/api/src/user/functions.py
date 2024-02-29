@@ -2,10 +2,8 @@ import re
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.security import HTTPBasicCredentials
-from jwt.exceptions import ExpiredSignatureError
 import hashlib
 from fastapi import Response
-from typing import Callable, Union, List
 from user.models import user as User, role as Role
 from user.jwt import encoded_jwt, encoded_jwt_refresh, decode_token
 
@@ -24,6 +22,7 @@ async def authenticate(credentials: HTTPBasicCredentials, session: AsyncSession)
     result = await session.execute(query)
     return result.mappings().all()
 
+# get all users
 async def get_users(session: AsyncSession):
     query = select(User)
     result = await session.execute(query)
@@ -39,7 +38,7 @@ async def get_users(session: AsyncSession):
         user_data_list.append(user_data)
     return user_data_list
 
-# access
+# access generate
 async def generate_access_token(user):
     user_data = {
         'id': user.id,
@@ -57,7 +56,15 @@ async def generate_refresh_token(user):
     }
     return encoded_jwt_refresh(user_data)
 
-# def return
+# generate access and refresh
+async def generate_tokens(user, response: Response):
+    access = await generate_access_token(user)
+    refresh = await generate_refresh_token(user)
+    response.set_cookie(key="access", value=access, httponly=True, secure=True, max_age=300)
+    response.set_cookie(key="refresh", value=refresh, httponly=True, secure=True, max_age=4320)
+    return
+    
+# def return user data 
 async def return_user(user):
     user_data = {
         'id': user.id,
@@ -68,7 +75,7 @@ async def return_user(user):
     }
     return user_data
 
-# refresh
+# refresh validate and return access token & user data
 async def validate_refresh_token(token: str, session: AsyncSession, response: Response,):
     token_decode = decode_token(token)
     query = select(User).where(User.c.username == token_decode["username"])
@@ -79,7 +86,7 @@ async def validate_refresh_token(token: str, session: AsyncSession, response: Re
     response.set_cookie(key="access", value=access_token, httponly=True, secure=True, max_age=300)
     return user
 
-# access
+# access validate and return user data 
 async def validate_access_token(token: str, session: AsyncSession): 
     token_decode = decode_token(token)
     query = select(User).where(
@@ -90,7 +97,9 @@ async def validate_access_token(token: str, session: AsyncSession):
         User.c.role_id == token_decode["role_id"],
         )
     result = await session.execute(query)
-    return result.mappings().all()
+    user = result.mappings().all()
+    user = user[0]
+    return user
 
 # Функция для получения роли пользователя по его ID из базы данных
 async def get_role_by_id(role_id: int, session: AsyncSession):
@@ -104,35 +113,28 @@ async def get_permissions(user, session):
     role = role[0]
     return role
 
-# 
-async def check_permission(token: str, session: AsyncSession, response: Response,):
+# validate access or refresh and return user data 
+async def validate_token(token: str, session: AsyncSession, response: Response):
     token_decode = decode_token(token)
     if all(key in token_decode for key in ["id", "username", "email", "is_active", "role_id"]):
         valid = await validate_access_token(token, session)
-        user = valid[0]
-        permission = await get_permissions(user, session)
-        permissions = permission.get("permissions", {})
-        return permissions
+        return valid
     elif "username" in token_decode and "exp" in token_decode:
         valid = await validate_refresh_token(token, session, response)
-        user = valid
-        permission = await get_permissions(user, session)
-        permissions = permission.get("permissions", {})
-        access_token = await generate_access_token(user)
-        response.set_cookie(key="access", value=access_token, httponly=True, secure=True, max_age=300)
-        return permissions
-    else: 
-        return False
+        return valid
+    else:
+        False
 
+# validate user datat and user permission return permissions
+async def permission_check(user, session):
+    permission = await get_permissions(user, session)
+    permissions = permission.get("permissions", {})
+    return permissions
 
-async def get_user_by_token(token: str, session: AsyncSession):
-    token_decode = decode_token(token)
-    username = token_decode["username"]
-    query = select(User).where(User.c.username == username)
+# select from user and validate data user.id finally return data user 
+async def user_data_get(data, session: AsyncSession):
+    query = select(User).where(User.c.id == data)
     result = await session.execute(query)
-    return result.mappings().all()
-
-
-
-
-
+    user = result.mappings().all()
+    user = user[0]
+    return user

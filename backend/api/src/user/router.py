@@ -1,9 +1,7 @@
 from fastapi import APIRouter, Depends, Response
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, insert
+from sqlalchemy import select, insert, update
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
-from jwt.exceptions import ExpiredSignatureError
-from typing import Optional
 # 
 from database import get_async_session
 from user.schemas import CreateUser, TokenInfo, ReadUser
@@ -13,26 +11,21 @@ from user.functions import (hash_password,
                             authenticate, 
                             generate_access_token, 
                             generate_refresh_token,
-                            check_permission,
-                            get_users,  
-                            get_user_by_token,
-                            return_user,
-                            get_permissions, 
-                            get_role_by_id,
-                            validate_access_token, validate_refresh_token, 
+                            get_users,
+                            validate_token,
+                            return_user, permission_check, generate_tokens, user_data_get
                             )
 
 security = HTTPBasic()
 
 
 router = APIRouter(
-	# prefix="/api/v1/auth",
-	prefix="",
+	prefix="/api/v1/auth",
 	tags=["User"]
 )
 
 # user register
-# @router.get("/register")
+@router.get("/register")
 async def register(
     user_create: CreateUser,
     session: AsyncSession = Depends(get_async_session)
@@ -56,21 +49,27 @@ async def login_user(
     if not user:
         return {"message": "User not found"}
     user = user[0]
-    access_token = await generate_access_token(user) 
-    refresh_token = await generate_refresh_token(user)
-    response.set_cookie(key="access", value=access_token, httponly=True, secure=True, max_age=300)
-    response.set_cookie(key="refresh", value=refresh_token, httponly=True, secure=True, max_age=4320)
-    return {"message": "Successful login",  "access": access_token, "refresh": refresh_token}
+    user_token = await generate_tokens(user, response) 
+    return {"message": "Successful login"}
 
-
-@router.get("/")
-async def get(id: int, token: str, response: Response, session: AsyncSession = Depends(get_async_session)):
-    has_permission = await check_permission(token, session, response)
+# update user data username & email
+@router.put("/update/my-account")
+async def update_user_data(token: str, user_data: ReadUser, response: Response, session: AsyncSession = Depends(get_async_session)):
+    user = await validate_token(token, session, response)
+    permissions = await permission_check(user, session)
     
-    if has_permission and "delete" in has_permission:
-        if has_permission["delete"]:
-            return await get_users(session)
-        else:
-            return {"У вас нет прав"}
+    if permissions.get("read"):
+        stmt = update(User).where(User.c.id == user.get("id")).values(username=user_data.username, email=user_data.email)
+        await session.execute(stmt)
+        await session.commit()
+        
+        data = user.get("id")
+        user = await user_data_get(data, session)
+        user_token = await generate_tokens(user, response) 
+        user = await return_user(user)
+        return user
+    
     else:
-        return {"Ошибка: недостаточно прав или неверный токен"}
+        return {"message": "Insufficient permissions"}
+    
+

@@ -10,7 +10,5 @@ class TokenInfo(BaseModel):
     token_type: str
 
 class ReadUser(BaseModel):
-    id: int 
     username: str 
     email: str
-    password: str
