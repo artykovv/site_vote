@@ -12,3 +12,7 @@ class TokenInfo(BaseModel):
 class ReadUser(BaseModel):
     username: str 
     email: str
+
+class EditPassword(BaseModel):
+    old_password: str
+    new_password: str
