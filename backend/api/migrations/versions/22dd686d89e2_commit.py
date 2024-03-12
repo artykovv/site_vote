@@ -43,7 +43,9 @@ def upgrade() -> None:
     SELECT id, name, permissions::json FROM (
         SELECT 1 as id, 'user' as name, '{"read": true, "write": false, "delete": false}' as permissions
         UNION ALL
-        SELECT 2 as id, 'admin' as name, '{"read": true, "write": true, "delete": true}' as permissions
+        SELECT 2 as id, 'admin' as name, '{"read": true, "write": true, "delete": false}' as permissions
+        UNION ALL
+        SELECT 3 as id, 'root' as name, '{"read": true, "write": true, "delete": true}' as permissions
     ) as subquery
     """)
     )

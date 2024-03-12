@@ -116,14 +116,17 @@ async def get_permissions(user, session):
 # validate access or refresh and return user data 
 async def validate_token(token: str, session: AsyncSession, response: Response):
     token_decode = decode_token(token)
-    if all(key in token_decode for key in ["id", "username", "email", "is_active", "role_id"]):
+    if all(key in token_decode for key in ["id", "username", "email", "is_active", "role_id"]) and token_decode["is_active"]:
         valid = await validate_access_token(token, session)
         return valid
     elif "username" in token_decode and "exp" in token_decode:
         valid = await validate_refresh_token(token, session, response)
-        return valid
+        if valid["is_active"]:
+            return valid
+        else:
+            return False
     else:
-        False
+        return False
 
 # validate user datat and user permission return permissions
 async def permission_check(user, session):
