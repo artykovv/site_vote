@@ -3,8 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, insert, update, delete
 # 
 from database import get_async_session
-from user.models import user as User, role as Role
-from user.functions import get_users, validate_token, permission_check, return_user, validate_refresh_token
+from auth.models import user as User, role as Role
+from auth.functions import get_users, validate_token, permission_check, return_user, validate_refresh_token
 
 
 router = APIRouter(

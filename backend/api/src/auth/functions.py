@@ -4,8 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.security import HTTPBasicCredentials
 import hashlib
 from fastapi import Response
-from user.models import user as User, role as Role
-from user.jwt import encoded_jwt, encoded_jwt_refresh, decode_token
+from auth.models import user as User, role as Role
+from auth.jwt import encoded_jwt, encoded_jwt_refresh, decode_token
 
 
 # hash password

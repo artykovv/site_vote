@@ -4,9 +4,9 @@ from sqlalchemy import select, insert, update
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 # 
 from database import get_async_session
-from user.schemas import CreateUser, TokenInfo, ReadUser, EditPassword
-from user.models import user as User, role
-from user.functions import (hash_password, 
+from auth.schemas import CreateUser, TokenInfo, ReadUser, EditPassword
+from auth.models import user as User, role
+from auth.functions import (hash_password, 
                             authenticate, 
                             validate_token,
                             return_user, permission_check, generate_tokens, user_data_get
