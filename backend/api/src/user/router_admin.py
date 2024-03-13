@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, insert, update, delete
 # 
 from database import get_async_session
-from user.models import user as User
+from user.models import user as User, role as Role
 from user.functions import get_users, validate_token, permission_check, return_user, validate_refresh_token
 
 
@@ -11,13 +11,7 @@ router = APIRouter(
 	prefix="/api/v1/admin",
 	tags=["Admin"]
 )
-@router.get("/dsf/adsf/asdf/asdf/asdf/asdf/asdf/")
-async def jafsekjasefj(
-    token: str,
-    response: Response,
-    session: AsyncSession = Depends(get_async_session)
-):
-    return await validate_token(token, session, response)
+
 # get all users 
 @router.get("/users")
 async def get_all_users(
@@ -29,7 +23,18 @@ async def get_all_users(
     permissions = await permission_check(user, session)
     
     if all(permissions[key] for key in ["read", "write"]):
-        users = await get_users(session)
+        query = select(
+            User.c.id,
+            User.c.username,
+            User.c.email,
+            User.c.is_active,
+            User.c.registered_at,
+            Role.c.permissions
+        ).select_from(
+            User.join(Role, User.c.role_id == Role.c.id)
+        )
+        result = await session.execute(query)
+        users = result.mappings().all()
         return users
     else:
         return False
